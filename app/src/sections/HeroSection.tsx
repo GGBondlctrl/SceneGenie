@@ -47,15 +47,15 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-screen overflow-hidden bg-bg-dark"
+      className="relative w-full h-screen overflow-hidden"
     >
-      {/* Video Background - Full display with contain */}
+      {/* Video Background - Full screen cover */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-contain bg-bg-dark"
+        className="absolute inset-0 w-full h-full object-cover"
       >
         <source
           src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_045634_e1c98c76-1265-4f5c-882a-4276f2080894.mp4"
