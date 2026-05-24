@@ -10,7 +10,8 @@
       "Bash(python3 \"/c/Users/Administrator/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/src/ui-ux-pro-max/scripts/search.py\" \"AI video generation tool creative modern minimal\" --design-system -p \"SceneGenie\")",
       "Bash(python3 \"/c/Users/Administrator/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/src/ui-ux-pro-max/scripts/search.py\" --help)",
       "Bash(npm run *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(curl -s http://localhost:3000/)"
     ],
     "additionalDirectories": [
       "d:\\video_gen\\docs\\superpowers"
