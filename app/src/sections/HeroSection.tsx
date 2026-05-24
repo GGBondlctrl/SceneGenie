@@ -4,7 +4,7 @@ import gsap from 'gsap';
 
 gsap.registerPlugin();
 
-const navLinks = ['Home', 'Templates', 'Generate', 'History', 'Settings'];
+const navLinks = ['首页', '模板', '生成视频', '历史', '设置'];
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -47,15 +47,15 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-screen overflow-hidden"
+      className="relative w-full min-h-screen overflow-hidden bg-bg-dark"
     >
-      {/* Video Background - Full display */}
+      {/* Video Background - Full display with contain */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-contain bg-bg-dark"
       >
         <source
           src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_045634_e1c98c76-1265-4f5c-882a-4276f2080894.mp4"
@@ -97,7 +97,7 @@ export default function HeroSection() {
       {/* Hero Content - Top Left */}
       <div className="absolute top-[15%] left-4 sm:left-6 lg:left-10 z-10">
         <div ref={h1Ref} className="relative">
-          <h1 className="font-grotesk uppercase text-cream leading-[1.05] max-w-[600px]"
+          <h1 className="font-grotesk uppercase text-cream leading-[1.05] max-w-[600px] tracking-[0.12em]"
             style={{
               fontSize: 'clamp(32px, 6vw, 72px)',
             }}
