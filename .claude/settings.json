@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(gh repo *)",
+      "Bash(mkdir -p d:/video_gen/docs/superpowers/specs)",
+      "WebFetch(domain:motionsites.ai)",
+      "Bash(ls \"C:\\\\Users\\\\Administrator\\\\.claude\\\\plugins\\\\cache\\\\ui-ux-pro-max-skill\\\\ui-ux-pro-max\\\\2.5.0\\\\.claude\\\\skills\\\\ui-ux-pro-max\\\\scripts\\\\\")",
+      "Read(//c/Users/Administrator/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/.claude/skills/ui-ux-pro-max/**)",
+      "Bash(python3 \"/c/Users/Administrator/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/src/ui-ux-pro-max/scripts/search.py\" \"AI video generation tool creative modern minimal\" --design-system -p \"SceneGenie\")",
+      "Bash(python3 \"/c/Users/Administrator/.claude/plugins/cache/ui-ux-pro-max-skill/ui-ux-pro-max/2.5.0/src/ui-ux-pro-max/scripts/search.py\" --help)",
+      "Bash(npm run *)",
+      "Bash(npm install *)"
+    ],
+    "additionalDirectories": [
+      "d:\\video_gen\\docs\\superpowers"
+    ]
+  }
+}
