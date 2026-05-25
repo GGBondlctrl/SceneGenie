@@ -143,7 +143,7 @@ export default function GenerateSection({
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
+        className="absolute inset-0 w-full h-full object-cover opacity-35"
       >
         <source src={BG_VIDEO} type="video/mp4" />
       </video>
@@ -151,14 +151,14 @@ export default function GenerateSection({
       {/* Dark overlay for readability */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'rgba(8, 8, 14, 0.78)' }}
+        style={{ background: 'rgba(8, 8, 14, 0.55)' }}
       />
 
       {/* Dark vignette overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at 50% 40%, transparent 0%, rgba(8,8,14,0.65) 100%)',
+          background: 'radial-gradient(ellipse at 50% 40%, transparent 0%, rgba(8,8,14,0.4) 100%)',
         }}
       />
 
