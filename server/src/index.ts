@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import authRoutes from './routes/auth.js';
+import videoRoutes from './routes/video.js';
 import { ipRateLimiter } from './middleware/rateLimiter.js';
 
 dotenv.config();
@@ -26,6 +28,9 @@ app.use(express.json());
 // Global IP rate limiting
 app.use(ipRateLimiter);
 
+// Static files for videos
+app.use('/videos', express.static(path.join(process.cwd(), 'public/videos')));
+
 // Health check
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
@@ -33,6 +38,7 @@ app.get('/health', (_req, res) => {
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/video', videoRoutes);
 
 // 404 handler
 app.use((_req, res) => {
