@@ -75,13 +75,21 @@ export default function HeroSection({ lang: _lang, t, onOpenLogin, onOpenSetting
         muted
         playsInline
         className="absolute inset-0 w-full h-full object-cover object-bottom"
-        style={{ filter: 'brightness(1.3) contrast(1.05)' }}
+        style={{ filter: 'brightness(1.8) contrast(1.1) saturate(1.1)' }}
       >
         <source
           src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_045634_e1c98c76-1265-4f5c-882a-4276f2080894.mp4"
           type="video/mp4"
         />
       </video>
+
+      {/* Brighten overlay — radial glow from top-center */}
+      <div
+        className="absolute inset-0 pointer-events-none z-[1]"
+        style={{
+          background: 'radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.12) 0%, transparent 55%)',
+        }}
+      />
 
       {/* Header / Nav */}
       <header className="absolute top-0 left-0 right-0 z-10 pt-4 sm:pt-6 px-4 sm:px-6 lg:px-10">
