@@ -7,7 +7,7 @@ import SettingsModal from './components/SettingsModal';
 import Dashboard from './pages/Dashboard';
 
 export default function App() {
-  const { user, isLoggedIn, login, logout, register } = useAuth();
+  const { user, isLoggedIn, error, login, logout, register, clearError } = useAuth();
   const { lang, setLang, t } = useLanguage();
   const [showLogin, setShowLogin] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -32,8 +32,6 @@ export default function App() {
       <Dashboard
         user={user}
         onLogout={logout}
-        lang={lang}
-        t={t}
       />
     );
   }
@@ -49,9 +47,10 @@ export default function App() {
       />
       <LoginModal
         isOpen={showLogin}
-        onClose={() => setShowLogin(false)}
+        onClose={() => { clearError(); setShowLogin(false); }}
         onLogin={handleLogin}
         onRegister={handleRegister}
+        apiError={error || undefined}
         lang={lang}
         t={t}
       />
