@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 100% 5%;
+    --foreground: 210 100% 97%;
+    --card: 210 100% 5%;
+    --card-foreground: 210 100% 97%;
+    --popover: 210 100% 5%;
+    --popover-foreground: 210 100% 97%;
+    --primary: 210 100% 97%;
+    --primary-foreground: 210 100% 5%;
+    --secondary: 210 80% 10%;
+    --secondary-foreground: 210 100% 97%;
+    --muted: 210 80% 10%;
+    --muted-foreground: 210 30% 60%;
+    --accent: 210 80% 10%;
+    --accent-foreground: 210 100% 97%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 40% 18%;
+    --input: 210 40% 18%;
+    --ring: 195 100% 50%;
+    --radius: 0.625rem;
+  }
+
+  body {
+    @apply bg-bg-dark text-cream;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  /* Sharp Glass - NO blur, clean and crisp */
+  .liquid-glass {
+    background: rgba(0, 20, 46, 0.6);
+    border: 1px solid rgba(0, 180, 255, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Edge highlight - blue tint */
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg,
+      rgba(0, 180, 255, 0.25) 0%, rgba(0, 180, 255, 0.08) 20%,
+      rgba(0, 180, 255, 0) 40%, rgba(0, 180, 255, 0) 60%,
+      rgba(0, 180, 255, 0.08) 80%, rgba(0, 180, 255, 0.25) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* Texture Overlay */
+  .texture-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    background-image: url('/texture.png');
+    background-size: cover;
+    background-position: center;
+    mix-blend-mode: lighten;
+    opacity: 0.15;
+  }
+
+  /* Font utilities */
+  .font-heading {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 0.95;
+  }
+
+  .font-script {
+    font-family: 'Condiment', cursive;
+    text-transform: none;
+  }
+}

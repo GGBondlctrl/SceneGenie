@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Code2, Frame, Sparkles, Download, RotateCcw } from 'lucide-react';
 import gsap from 'gsap';
 import type { GenerateResult } from '../hooks/useGenerate';
+import { useLanguage } from '../hooks/useLanguage';
 
 const ratios = ['16:9', '9:16', '1:1', '4:3'] as const;
 type Ratio = (typeof ratios)[number];
@@ -16,11 +17,7 @@ const placeholderPrompts = [
 const animTypes = ['fadeIn', 'slideX', 'scaleUp', 'stagger'];
 const animColors = ['#00B4FF', '#b724ff', '#3b82f6', '#f59e0b'];
 
-interface Track {
-  y: number;
-  speed: number;
-  nodes: { x: number; alpha: number; pulseSpeed: number; pulseOffset: number }[];
-}
+const BG_VIDEO = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_151551_992053d1-3d3e-4b8c-abac-45f22158f411.mp4';
 
 interface GenerateSectionProps {
   prompt: string;
@@ -52,9 +49,36 @@ export default function GenerateSection({
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const tracksRef = useRef<Track[]>([]);
-  const animFrameRef = useRef<number>(0);
+
+  const { t } = useLanguage();
+
+  // Translations
+  const tx = {
+    title: t({ en: 'Orchestrate Your Video', zh: '编排你的视频' }),
+    subtitle: t({ en: 'Describe your needs, AI generates GSAP Timeline choreography, precise control over every frame', zh: '输入需求，AI 生成 GSAP Timeline 编排，精确控制每一帧' }),
+    textareaHint: t({ en: 'Supports natural language animation descriptions', zh: '支持自然语言描述动画需求' }),
+    ratioLabel: t({ en: 'Ratio', zh: '比例' }),
+    timelinePreview: t({ en: 'GSAP Timeline Preview', zh: 'GSAP Timeline Preview' }),
+    totalDuration: t({ en: '~5s total', zh: '~5s total' }),
+    generating: t({ en: 'Orchestrating GSAP animation...', zh: '正在编排 GSAP 动画...' }),
+    generateBtn: t({ en: 'Generate', zh: '生成编排' }),
+    downloadVideo: t({ en: 'Download Video', zh: '下载视频' }),
+    regenerate: t({ en: 'Regenerate', zh: '重新生成' }),
+    dimension: t({ en: 'Dimension', zh: '尺寸' }),
+    duration: t({ en: 'Duration', zh: '时长' }),
+    generatedAt: t({ en: 'Generated at', zh: '生成时间' }),
+    scrollHint: t({ en: 'Templates', zh: '编排模板' }),
+    errorMsg: t({ en: 'Generation failed, please try again', zh: '生成失败，请重试' }),
+  };
+
+  const tags = [
+    { en: 'Product Showcase', zh: '产品展示' },
+    { en: 'Data Charts', zh: '数据图表' },
+    { en: 'Social Media', zh: '社媒推广' },
+    { en: 'Subtitles', zh: '字幕视频' },
+    { en: 'Landing Page', zh: '落地页' },
+    { en: 'TikTok', zh: 'TikTok' },
+  ];
 
   // Placeholder rotation
   useEffect(() => {
@@ -98,141 +122,6 @@ export default function GenerateSection({
     }
   }, [result]);
 
-  // Canvas timeline background animation
-  const initCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
-
-    const trackCount = 5;
-    const tracks: Track[] = [];
-    for (let i = 0; i < trackCount; i++) {
-      const nodeCount = 4 + Math.floor(Math.random() * 4);
-      const nodes = [];
-      for (let j = 0; j < nodeCount; j++) {
-        nodes.push({
-          x: Math.random() * rect.width,
-          alpha: 0.1 + Math.random() * 0.3,
-          pulseSpeed: 0.5 + Math.random() * 1.5,
-          pulseOffset: Math.random() * Math.PI * 2,
-        });
-      }
-      tracks.push({
-        y: rect.height * (0.2 + (i / trackCount) * 0.6),
-        speed: 0.15 + Math.random() * 0.25,
-        nodes,
-      });
-    }
-    tracksRef.current = tracks;
-  }, []);
-
-  useEffect(() => {
-    initCanvas();
-    window.addEventListener('resize', initCanvas);
-    return () => window.removeEventListener('resize', initCanvas);
-  }, [initCanvas]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let time = 0;
-
-    const animate = () => {
-      const rect = canvas.getBoundingClientRect();
-      ctx.clearRect(0, 0, rect.width, rect.height);
-      time += 0.016;
-
-      const tracks = tracksRef.current;
-      for (let ti = 0; ti < tracks.length; ti++) {
-        const track = tracks[ti];
-
-        // Track line
-        ctx.beginPath();
-        ctx.moveTo(0, track.y);
-        ctx.lineTo(rect.width, track.y);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-
-        // Vertical grid markers
-        for (let gx = 0; gx < rect.width; gx += 120) {
-          const offsetX = ((time * 8) % 120);
-          const x = gx - offsetX;
-          if (x < 0 || x > rect.width) continue;
-          ctx.beginPath();
-          ctx.moveTo(x, track.y - 3);
-          ctx.lineTo(x, track.y + 3);
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.015)';
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
-
-        // Keyframe nodes
-        for (let ni = 0; ni < track.nodes.length; ni++) {
-          const node = track.nodes[ni];
-          node.x -= track.speed;
-          if (node.x < -20) node.x = rect.width + 20;
-
-          const pulseAlpha = node.alpha + Math.sin(time * node.pulseSpeed + node.pulseOffset) * 0.08;
-          const clampedAlpha = Math.max(0.05, Math.min(0.5, pulseAlpha));
-
-          // Glow
-          const gradient = ctx.createRadialGradient(node.x, track.y, 0, node.x, track.y, 12);
-          gradient.addColorStop(0, `rgba(0, 180, 255, ${clampedAlpha * 0.4})`);
-          gradient.addColorStop(1, 'rgba(0, 180, 255, 0)');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(node.x - 12, track.y - 12, 24, 24);
-
-          // Dot
-          ctx.beginPath();
-          ctx.arc(node.x, track.y, 2, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(0, 180, 255, ${clampedAlpha})`;
-          ctx.fill();
-
-          // Connector
-          if (ni < track.nodes.length - 1) {
-            const nextNode = track.nodes[ni + 1];
-            let dx = nextNode.x - node.x;
-            if (dx < 0) dx += rect.width;
-            ctx.beginPath();
-            ctx.moveTo(node.x + 4, track.y);
-            ctx.lineTo(node.x + dx / 2, track.y);
-            ctx.strokeStyle = `rgba(0, 180, 255, ${clampedAlpha * 0.15})`;
-            ctx.lineWidth = 1;
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Floating particles
-      for (let i = 0; i < 15; i++) {
-        const px = ((time * 3 + i * 73.7) % (rect.width + 40)) - 20;
-        const py = ((Math.sin(time * 0.3 + i * 1.7) * 0.5 + 0.5) * rect.height);
-        const pAlpha = 0.03 + Math.sin(time * 0.5 + i) * 0.02;
-        ctx.beginPath();
-        ctx.arc(px, py, 1, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, pAlpha)})`;
-        ctx.fill();
-      }
-
-      animFrameRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-    return () => cancelAnimationFrame(animFrameRef.current);
-  }, []);
-
   const handleGenerate = () => {
     if (!prompt.trim() || isGenerating) return;
     onGenerate();
@@ -248,11 +137,21 @@ export default function GenerateSection({
       ref={sectionRef}
       className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24 pb-12"
     >
-      {/* Canvas Timeline Background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ background: '#010828' }}
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover opacity-20"
+      >
+        <source src={BG_VIDEO} type="video/mp4" />
+      </video>
+
+      {/* Dark overlay for readability */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: 'rgba(1, 8, 40, 0.75)' }}
       />
 
       {/* Dark vignette overlay */}
@@ -277,10 +176,10 @@ export default function GenerateSection({
             className="font-grotesk uppercase text-cream leading-[1.05] mb-2"
             style={{ fontSize: 'clamp(28px, 5vw, 52px)' }}
           >
-            编排你的视频
+            {tx.title}
           </h1>
           <p className="font-mono text-cream/35 text-[12px] sm:text-[13px] tracking-wide">
-            输入需求，AI 生成 GSAP Timeline 编排，精确控制每一帧
+            {tx.subtitle}
           </p>
         </div>
 
@@ -307,7 +206,7 @@ export default function GenerateSection({
             <div className="flex items-center justify-between mt-2 px-1">
               <span className="flex items-center gap-2 text-cream/25 text-[11px] font-mono">
                 <Code2 size={11} />
-                支持自然语言描述动画需求
+                {tx.textareaHint}
               </span>
               <span className="text-cream/18 text-[11px] font-mono">
                 {prompt.length}/500
@@ -319,7 +218,7 @@ export default function GenerateSection({
           <div className="flex flex-wrap items-center gap-3 mb-5">
             <div className="flex items-center gap-2">
               <Frame size={13} className="text-cream/35" />
-              <span className="font-mono text-cream/35 text-[11px] uppercase tracking-wider">比例</span>
+              <span className="font-mono text-cream/35 text-[11px] uppercase tracking-wider">{tx.ratioLabel}</span>
               <div className="flex gap-1">
                 {ratios.map((r) => (
                   <button
@@ -342,8 +241,8 @@ export default function GenerateSection({
           {(isGenerating || result) && (
             <div className="mb-5 p-4 bg-black/30 rounded-[16px] border border-white/5">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] text-neon uppercase tracking-wider">GSAP Timeline Preview</span>
-                <span className="font-mono text-[10px] text-cream/25">~5s total</span>
+                <span className="font-mono text-[10px] text-neon uppercase tracking-wider">{tx.timelinePreview}</span>
+                <span className="font-mono text-[10px] text-cream/25">{tx.totalDuration}</span>
               </div>
               <div className="flex gap-1 h-6">
                 {(result?.timeline || [
@@ -387,12 +286,12 @@ export default function GenerateSection({
             {isGenerating ? (
               <>
                 <div className="w-5 h-5 border-2 border-bg-dark/30 border-t-bg-dark rounded-full animate-spin" />
-                正在编排 GSAP 动画...
+                {tx.generating}
               </>
             ) : (
               <>
                 <Sparkles size={17} />
-                生成编排
+                {tx.generateBtn}
               </>
             )}
           </button>
@@ -432,42 +331,42 @@ export default function GenerateSection({
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-[16px] bg-neon text-bg-dark font-grotesk text-[13px] uppercase tracking-wider hover:shadow-[0_0_40px_rgba(0,180,255,0.3)] transition-all"
               >
                 <Download size={15} />
-                下载视频
+                {tx.downloadVideo}
               </a>
               <button
                 onClick={onRegenerate}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-[16px] liquid-glass font-grotesk text-[13px] uppercase tracking-wider text-cream hover:text-neon transition-colors"
               >
                 <RotateCcw size={15} />
-                重新生成
+                {tx.regenerate}
               </button>
             </div>
 
             {/* Info */}
             <div className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[10px] text-cream/25 uppercase tracking-wider">
-              <span>尺寸: {selectedRatio}</span>
-              <span>时长: ~5s</span>
-              <span>生成时间: {formatDate(result.createdAt)}</span>
+              <span>{tx.dimension}: {selectedRatio}</span>
+              <span>{tx.duration}: ~5s</span>
+              <span>{tx.generatedAt}: {formatDate(result.createdAt)}</span>
             </div>
           </div>
         )}
 
         {/* Quick tags */}
         <div className="mt-5 flex flex-wrap justify-center gap-2">
-          {['产品展示', '数据图表', '社媒推广', '字幕视频', '落地页', 'TikTok'].map((tag) => (
+          {tags.map((tag) => (
             <button
-              key={tag}
-              onClick={() => onAppendTag(tag)}
+              key={tag.en}
+              onClick={() => onAppendTag(tag.zh)}
               className="liquid-glass px-4 py-2 rounded-[999px] text-[11px] font-mono text-cream/45 hover:text-neon hover:bg-white/5 transition-all duration-300"
             >
-              {tag}
+              {t(tag)}
             </button>
           ))}
         </div>
 
         {/* Scroll hint */}
         <div className="mt-10 flex flex-col items-center gap-2 text-cream/20">
-          <span className="font-mono text-[10px] uppercase tracking-widest">编排模板</span>
+          <span className="font-mono text-[10px] uppercase tracking-widest">{tx.scrollHint}</span>
           <div className="w-px h-6 bg-gradient-to-b from-cream/20 to-transparent" />
         </div>
       </div>
