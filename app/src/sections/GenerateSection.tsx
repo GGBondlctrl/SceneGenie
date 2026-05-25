@@ -234,14 +234,14 @@ export default function GenerateSection({
                 <span className="font-mono text-[10px] text-cream/25">{tx.totalDuration}</span>
               </div>
               <div className="flex gap-1 h-6">
-                {(result?.timeline || [
+                {([
                   { label: '0.0s', width: '15%', color: '#00B4FF' },
                   { label: '0.5s', width: '10%', color: '#b724ff' },
                   { label: '1.2s', width: '20%', color: '#3b82f6' },
                   { label: '2.0s', width: '15%', color: '#00B4FF' },
                   { label: '3.0s', width: '25%', color: '#f59e0b' },
                   { label: '4.5s', width: '15%', color: '#b724ff' },
-                ]).map((kf, i) => (
+                ] as const).map((kf, i: number) => (
                   <div key={i} className="relative group" style={{ width: kf.width }}>
                     <div
                       className="h-full rounded-[4px] transition-all duration-300 group-hover:brightness-125"

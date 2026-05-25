@@ -1,68 +1,93 @@
 import { useState, useCallback, useRef } from 'react';
 import { api } from '../services/api.js';
+import { generateHTML, type LLMProvider } from '../services/llm.js';
 
 export interface GenerateResult {
   id: string;
   videoUrl: string;
-  timeline: { label: string; width: string; color: string }[];
   createdAt: string;
 }
+
+type GeneratePhase = 'idle' | 'generating_html' | 'rendering_video' | 'completed' | 'error';
 
 export function useGenerate() {
   const [prompt, setPrompt] = useState('');
   const [selectedRatio, setSelectedRatio] = useState<'16:9' | '9:16' | '1:1' | '4:3'>('16:9');
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [phase, setPhase] = useState<GeneratePhase>('idle');
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Track last generation params for "regenerate"
   const lastPromptRef = useRef('');
   const lastRatioRef = useRef<'16:9' | '9:16' | '1:1' | '4:3'>('16:9');
+
+  const getLLMConfig = useCallback(() => {
+    const provider = localStorage.getItem('scene-genie-llm-provider') as LLMProvider | null;
+    const apiKey = localStorage.getItem('scene-genie-llm-key');
+    if (!provider || !apiKey) return null;
+    const baseUrl = localStorage.getItem('scene-genie-llm-baseurl') || undefined;
+    return { provider, apiKey, baseUrl };
+  }, []);
 
   const generate = useCallback(async () => {
     if (!prompt.trim()) return;
 
-    setIsGenerating(true);
+    const llmConfig = getLLMConfig();
+    if (!llmConfig) {
+      setError('请先在设置中配置 LLM API Key');
+      setPhase('error');
+      return;
+    }
+
+    setPhase('generating_html');
     setError(null);
     setResult(null);
 
     lastPromptRef.current = prompt;
     lastRatioRef.current = selectedRatio;
 
+    let html: string;
     try {
-      const res = await api.generateVideo({ html: prompt, ratio: selectedRatio });
+      html = await generateHTML(llmConfig, prompt, selectedRatio);
+    } catch (err) {
+      setError('动画代码生成失败：' + (err as Error).message);
+      setPhase('error');
+      return;
+    }
 
-      if (res.status === 'completed' && res.videoUrl && res.timeline) {
+    setPhase('rendering_video');
+
+    try {
+      const res = await api.generateVideo({ html, ratio: selectedRatio });
+
+      if (res.status === 'completed' && res.videoUrl) {
         setResult({
           id: res.id,
           videoUrl: res.videoUrl,
-          timeline: res.timeline,
           createdAt: res.createdAt,
         });
+        setPhase('completed');
       } else {
-        setError('生成失败，请重试');
+        setError('视频渲染失败，请重试');
+        setPhase('error');
       }
     } catch (err) {
-      setError((err as Error).message || '生成失败，请重试');
-    } finally {
-      setIsGenerating(false);
+      setError((err as Error).message || '视频渲染失败，请重试');
+      setPhase('error');
     }
-  }, [prompt, selectedRatio]);
+  }, [prompt, selectedRatio, getLLMConfig]);
 
   const regenerate = useCallback(() => {
     setPrompt(lastPromptRef.current);
     setSelectedRatio(lastRatioRef.current);
     setResult(null);
     setError(null);
-  }, []);
-
-  const appendTag = useCallback((tag: string) => {
-    setPrompt((prev) => (prev ? `${prev}，${tag}` : tag));
+    setPhase('idle');
   }, []);
 
   const clearResult = useCallback(() => {
     setResult(null);
     setError(null);
+    setPhase('idle');
   }, []);
 
   return {
@@ -70,12 +95,12 @@ export function useGenerate() {
     setPrompt,
     selectedRatio,
     setSelectedRatio,
-    isGenerating,
+    isGenerating: phase === 'generating_html' || phase === 'rendering_video',
+    phase,
     result,
     error,
     generate,
     regenerate,
-    appendTag,
     clearResult,
   };
 }
