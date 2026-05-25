@@ -75,6 +75,7 @@ export default function HeroSection({ lang: _lang, t, onOpenLogin, onOpenSetting
         muted
         playsInline
         className="absolute inset-0 w-full h-full object-cover object-bottom"
+        style={{ filter: 'brightness(1.3) contrast(1.05)' }}
       >
         <source
           src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_045634_e1c98c76-1265-4f5c-882a-4276f2080894.mp4"
