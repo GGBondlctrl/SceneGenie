@@ -72,8 +72,6 @@ export default function GenerateSection({
   };
 
   const tags = [
-    { en: 'Product Showcase', zh: '产品展示' },
-    { en: 'Data Charts', zh: '数据图表' },
     { en: 'Social Media', zh: '社媒推广' },
     { en: 'Subtitles', zh: '字幕视频' },
     { en: 'Landing Page', zh: '落地页' },
