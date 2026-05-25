@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { api, type GenerateVideoResponse } from '../services/api.js';
+import { api } from '../services/api.js';
 
 export interface GenerateResult {
   id: string;

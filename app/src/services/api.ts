@@ -99,7 +99,7 @@ export const api = {
   me: (): Promise<{ user: ApiUser }> =>
     fetchJson('/auth/me'),
 
-  generateVideo: (req: GenerateVideoRequest): Promise<GenerateVideoResponse> =>
+  generateVideo: (_req: GenerateVideoRequest): Promise<GenerateVideoResponse> =>
     new Promise((resolve) => {
       const delay = 3000 + Math.random() * 2000; // 3-5s
       setTimeout(() => {
