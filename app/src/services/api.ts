@@ -20,6 +20,35 @@ export class ApiError extends Error {
   }
 }
 
+export interface GenerateVideoRequest {
+  prompt: string;
+  ratio: '16:9' | '9:16' | '1:1' | '4:3';
+}
+
+export interface TimelineKeyframe {
+  label: string;
+  width: string;
+  color: string;
+}
+
+export interface GenerateVideoResponse {
+  id: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  videoUrl?: string;
+  timeline?: TimelineKeyframe[];
+  createdAt: string;
+}
+
+// MVP 阶段模拟数据
+const mockTimeline: TimelineKeyframe[] = [
+  { label: '0.0s', width: '15%', color: '#00B4FF' },
+  { label: '0.5s', width: '10%', color: '#b724ff' },
+  { label: '1.2s', width: '20%', color: '#3b82f6' },
+  { label: '2.0s', width: '15%', color: '#00B4FF' },
+  { label: '3.0s', width: '25%', color: '#f59e0b' },
+  { label: '4.5s', width: '15%', color: '#b724ff' },
+];
+
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const token = localStorage.getItem('scene-genie-token');
 
@@ -69,4 +98,18 @@ export const api = {
 
   me: (): Promise<{ user: ApiUser }> =>
     fetchJson('/auth/me'),
+
+  generateVideo: (req: GenerateVideoRequest): Promise<GenerateVideoResponse> =>
+    new Promise((resolve) => {
+      const delay = 3000 + Math.random() * 2000; // 3-5s
+      setTimeout(() => {
+        resolve({
+          id: `vid_${Date.now()}`,
+          status: 'completed',
+          videoUrl: 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_045634_e1c98c76-1265-4f5c-882a-4276f2080894.mp4',
+          timeline: mockTimeline,
+          createdAt: new Date().toISOString(),
+        });
+      }, delay);
+    }),
 };
