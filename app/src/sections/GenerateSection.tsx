@@ -25,6 +25,7 @@ interface GenerateSectionProps {
   selectedRatio: Ratio;
   setSelectedRatio: (v: Ratio) => void;
   isGenerating: boolean;
+  phase: 'idle' | 'generating_html' | 'rendering_video' | 'completed' | 'error';
   result: GenerateResult | null;
   error: string | null;
   onGenerate: () => void;
@@ -37,6 +38,7 @@ export default function GenerateSection({
   selectedRatio,
   setSelectedRatio,
   isGenerating,
+  phase,
   result,
   error,
   onGenerate,
@@ -59,6 +61,8 @@ export default function GenerateSection({
     timelinePreview: t({ en: 'GSAP Timeline Preview', zh: 'GSAP Timeline Preview' }),
     totalDuration: t({ en: '~5s total', zh: '~5s total' }),
     generating: t({ en: 'Orchestrating GSAP animation...', zh: '正在编排 GSAP 动画...' }),
+    generatingHtml: t({ en: 'Generating animation code...', zh: '正在生成动画代码...' }),
+    renderingVideo: t({ en: 'Rendering video...', zh: '正在渲染视频...' }),
     generateBtn: t({ en: 'Launch Rocket', zh: '发射火箭' }),
     downloadVideo: t({ en: 'Download Video', zh: '下载视频' }),
     regenerate: t({ en: 'Regenerate', zh: '重新生成' }),
@@ -275,7 +279,7 @@ export default function GenerateSection({
             {isGenerating ? (
               <>
                 <div className="w-5 h-5 border-2 border-bg-dark/30 border-t-bg-dark rounded-full animate-spin" />
-                {tx.generating}
+                {phase === 'generating_html' ? tx.generatingHtml : tx.renderingVideo}
               </>
             ) : (
               <>

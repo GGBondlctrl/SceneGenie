@@ -17,6 +17,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
     selectedRatio,
     setSelectedRatio,
     isGenerating,
+    phase,
     result,
     error,
     generate,
@@ -47,6 +48,7 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
         selectedRatio={selectedRatio}
         setSelectedRatio={setSelectedRatio}
         isGenerating={isGenerating}
+        phase={phase}
         result={result}
         error={error}
         onGenerate={generate}
