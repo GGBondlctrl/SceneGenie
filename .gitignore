@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+app/dist/
+server/dist/
+
+# Environment variables
+.env
+.env.local
+
+# SQLite database files
+*.db
+*.db-journal
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+screenshot-*.png
+debug-screenshot.*
+
+# Claude local config
+.claude/

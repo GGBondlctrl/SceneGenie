@@ -1,16 +1,35 @@
 import { useEffect, useRef } from 'react';
-import { Mail, Twitter, Github } from 'lucide-react';
+import { HelpCircle, Sun, MessageSquare } from 'lucide-react';
 import gsap from 'gsap';
+import type { Language } from '../hooks/useLanguage';
 
 gsap.registerPlugin();
 
-const navLinks = ['首页', '模板', '生成视频', '历史', '设置'];
+interface HeroSectionProps {
+  lang: Language;
+  t: (dict: Record<Language, string>) => string;
+  onOpenLogin: () => void;
+  onOpenSettings: () => void;
+}
 
-export default function HeroSection() {
+export default function HeroSection({ lang: _lang, t, onOpenLogin, onOpenSettings }: HeroSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const h1Ref = useRef<HTMLDivElement>(null);
   const cursiveRef = useRef<HTMLSpanElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
+
+  const navItems = [
+    { key: 'login', label: t({ en: 'Log In', zh: '登录' }), action: 'login' },
+    { key: 'home', label: t({ en: 'Home', zh: '首页' }), action: 'login' },
+    { key: 'features', label: t({ en: 'Features', zh: '功能' }), action: 'none' },
+    { key: 'settings', label: t({ en: 'Settings', zh: '设置' }), action: 'settings' },
+  ] as const;
+
+  const handleNavClick = (action: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (action === 'login') onOpenLogin();
+    if (action === 'settings') onOpenSettings();
+  };
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -76,13 +95,14 @@ export default function HeroSection() {
             ref={navRef}
             className="hidden lg:flex items-center liquid-glass rounded-[28px] px-[52px] py-[24px] gap-8"
           >
-            {navLinks.map((link) => (
+            {navItems.map((item) => (
               <a
-                key={link}
+                key={item.key}
                 href="#"
+                onClick={handleNavClick(item.action)}
                 className="font-grotesk text-[13px] uppercase text-cream hover:text-neon transition-colors duration-300 tracking-[0.02em]"
               >
-                {link}
+                {item.label}
               </a>
             ))}
           </div>
@@ -97,14 +117,21 @@ export default function HeroSection() {
       {/* Hero Content - Top Left */}
       <div className="absolute top-[15%] left-4 sm:left-6 lg:left-10 z-10">
         <div ref={h1Ref} className="relative">
-          <h1 className="font-grotesk uppercase text-cream leading-[1.05] max-w-[600px] tracking-[0.12em]"
+          <h1 className="font-grotesk uppercase text-cream leading-[1.1] max-w-[900px]"
             style={{
               fontSize: 'clamp(32px, 6vw, 72px)',
+              wordSpacing: '0.18em',
             }}
           >
-            <span className="h1-line block">One line</span>
-            <span className="h1-line block">to create</span>
-            <span className="h1-line block">your video</span>
+            <span className="h1-line block">
+              {t({ en: 'Welcome Aboard,', zh: '欢迎着陆,' })}
+            </span>
+            <span className="h1-line block">
+              {t({ en: 'One Line to Create', zh: '一句话创建' })}
+            </span>
+            <span className="h1-line block">
+              {t({ en: 'Your Video', zh: '你的专属视频' })}
+            </span>
           </h1>
 
           {/* Cursive Accent */}
@@ -115,17 +142,17 @@ export default function HeroSection() {
               fontSize: 'clamp(20px, 3vw, 36px)',
             }}
           >
-            AI Video Generator
+            SceneGenie
           </span>
         </div>
       </div>
 
-      {/* Social Icons - Bottom Right */}
+      {/* Quick Action Icons - Bottom Right */}
       <div className="absolute right-[4vw] bottom-[8vh] z-10 flex flex-col gap-2.5">
         {[
-          { icon: Mail, label: 'Mail' },
-          { icon: Twitter, label: 'Twitter' },
-          { icon: Github, label: 'Github' },
+          { icon: HelpCircle, label: t({ en: 'Help', zh: '帮助' }) },
+          { icon: Sun, label: t({ en: 'Theme', zh: '主题' }) },
+          { icon: MessageSquare, label: t({ en: 'Feedback', zh: '反馈' }) },
         ].map(({ icon: Icon, label }) => (
           <button
             key={label}
