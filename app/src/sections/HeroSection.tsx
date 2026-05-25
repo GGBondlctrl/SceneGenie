@@ -100,7 +100,7 @@ export default function HeroSection({ lang: _lang, t, onOpenLogin, onOpenSetting
                 key={item.key}
                 href="#"
                 onClick={handleNavClick(item.action)}
-                className="font-grotesk text-[13px] uppercase text-cream hover:text-neon transition-colors duration-300 tracking-[0.02em]"
+                className="font-grotesk text-[13px] uppercase text-cream hover:text-blue-400 transition-colors duration-300 tracking-[0.02em]"
               >
                 {item.label}
               </a>

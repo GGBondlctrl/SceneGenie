@@ -31,6 +31,17 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
     return () => clearInterval(timer);
   }, [isOpen, countdown]);
 
+  // Reset to login mode when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setMode('login');
+      setError('');
+      setCode('');
+      setCodeSent(false);
+      setCountdown(0);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -103,17 +114,18 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
 
       {/* Modal */}
       <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="liquid-glass rounded-[2rem] p-8 sm:p-10">
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-            aria-label="Close"
-          >
-            <X size={20} className="text-cream/70" />
-          </button>
+        {/* Close button — outside scrollable area so it stays fixed */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 z-20 w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+          aria-label="Close"
+        >
+          <X size={20} className="text-cream/70" />
+        </button>
 
-          {/* Header */}
+        <div className="liquid-glass rounded-[2rem] max-h-[90vh] overflow-y-auto">
+          <div className="p-8 sm:p-10">
+            {/* Header */}
           <div className="mb-8">
             <h2 className="font-grotesk uppercase text-cream text-[28px] leading-tight tracking-wide">
               {mode === 'login'
@@ -144,7 +156,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={t({ en: 'Your name', zh: '您的姓名' })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-neon/50 transition-colors"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-blue-400/50 transition-colors"
                   />
                 </div>
               </div>
@@ -164,7 +176,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-neon/50 transition-colors"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-blue-400/50 transition-colors"
                 />
               </div>
             </div>
@@ -183,7 +195,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder={t({ en: 'Enter your password', zh: '输入密码' })}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-neon/50 transition-colors"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-blue-400/50 transition-colors"
                 />
               </div>
             </div>
@@ -203,7 +215,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder={t({ en: 'Confirm your password', zh: '再次输入密码' })}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-neon/50 transition-colors"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-11 pr-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-blue-400/50 transition-colors"
                   />
                 </div>
               </div>
@@ -224,7 +236,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
                       value={code}
                       onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       placeholder={t({ en: '6-digit code', zh: '6位数字' })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-neon/50 transition-colors text-center tracking-[0.3em]"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-cream text-[14px] placeholder:text-cream/30 focus:outline-none focus:border-blue-400/50 transition-colors text-center tracking-[0.3em]"
                     />
                   </div>
                   <button
@@ -265,7 +277,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
           <div className="mt-6 text-center">
             <button
               onClick={toggleMode}
-              className="font-mono text-cream/40 text-[12px] uppercase tracking-wider hover:text-neon transition-colors"
+              className="font-mono text-cream/40 text-[12px] uppercase tracking-wider hover:text-blue-400 transition-colors"
             >
               {mode === 'login'
                 ? t({ en: "Don't have an account? Sign Up", zh: '没有账号？立即注册' })
@@ -315,5 +327,6 @@ export default function LoginModal({ isOpen, onClose, onLogin, onRegister, lang:
         </div>
       </div>
     </div>
+  </div>
   );
 }

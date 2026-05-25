@@ -197,7 +197,7 @@ export default function Dashboard({ user, onLogout, lang: _lang, t }: DashboardP
                     <label className="font-mono text-cream/50 text-[11px] uppercase tracking-wider block mb-2">
                       {t({ en: 'Provider', zh: '提供商' })}
                     </label>
-                    <select className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-cream text-[14px] outline-none focus:border-neon/50">
+                    <select className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-cream text-[14px] outline-none focus:border-blue-400/50">
                       <option>Claude</option>
                       <option>OpenAI</option>
                       <option>Kimi</option>
@@ -211,7 +211,7 @@ export default function Dashboard({ user, onLogout, lang: _lang, t }: DashboardP
                     <input
                       type="password"
                       placeholder="sk-..."
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-cream text-[14px] placeholder:text-cream/20 outline-none focus:border-neon/50"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-cream text-[14px] placeholder:text-cream/20 outline-none focus:border-blue-400/50"
                     />
                   </div>
                 </div>
