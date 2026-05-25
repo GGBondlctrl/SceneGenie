@@ -29,7 +29,6 @@ interface GenerateSectionProps {
   error: string | null;
   onGenerate: () => void;
   onRegenerate: () => void;
-  onAppendTag: (tag: string) => void;
 }
 
 export default function GenerateSection({
@@ -42,7 +41,6 @@ export default function GenerateSection({
   error,
   onGenerate,
   onRegenerate,
-  onAppendTag,
 }: GenerateSectionProps) {
   const [placeholder, setPlaceholder] = useState(placeholderPrompts[0]);
   const sectionRef = useRef<HTMLElement>(null);
@@ -61,7 +59,7 @@ export default function GenerateSection({
     timelinePreview: t({ en: 'GSAP Timeline Preview', zh: 'GSAP Timeline Preview' }),
     totalDuration: t({ en: '~5s total', zh: '~5s total' }),
     generating: t({ en: 'Orchestrating GSAP animation...', zh: '正在编排 GSAP 动画...' }),
-    generateBtn: t({ en: 'Generate', zh: '生成编排' }),
+    generateBtn: t({ en: 'Launch Rocket', zh: '发射火箭' }),
     downloadVideo: t({ en: 'Download Video', zh: '下载视频' }),
     regenerate: t({ en: 'Regenerate', zh: '重新生成' }),
     dimension: t({ en: 'Dimension', zh: '尺寸' }),
@@ -70,13 +68,6 @@ export default function GenerateSection({
     scrollHint: t({ en: 'Templates', zh: '编排模板' }),
     errorMsg: t({ en: 'Generation failed, please try again', zh: '生成失败，请重试' }),
   };
-
-  const tags = [
-    { en: 'Social Media', zh: '社媒推广' },
-    { en: 'Subtitles', zh: '字幕视频' },
-    { en: 'Landing Page', zh: '落地页' },
-    { en: 'TikTok', zh: 'TikTok' },
-  ];
 
   // Placeholder rotation
   useEffect(() => {
@@ -171,7 +162,7 @@ export default function GenerateSection({
             </span>
           </div>
           <h1
-            className="font-grotesk uppercase text-cream leading-[1.05] mb-2"
+            className="font-grotesk uppercase text-cream leading-[1.05] mb-4"
             style={{ fontSize: 'clamp(28px, 5vw, 52px)' }}
           >
             {tx.title}
@@ -348,19 +339,6 @@ export default function GenerateSection({
             </div>
           </div>
         )}
-
-        {/* Quick tags */}
-        <div className="mt-5 flex flex-wrap justify-center gap-2">
-          {tags.map((tag) => (
-            <button
-              key={tag.en}
-              onClick={() => onAppendTag(tag.zh)}
-              className="liquid-glass px-4 py-2 rounded-[999px] text-[11px] font-mono text-cream/45 hover:text-neon hover:bg-white/5 transition-all duration-300"
-            >
-              {t(tag)}
-            </button>
-          ))}
-        </div>
 
         {/* Scroll hint */}
         <div className="mt-10 flex flex-col items-center gap-2 text-cream/20">

@@ -21,7 +21,6 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
     error,
     generate,
     regenerate,
-    appendTag,
     clearResult,
   } = useGenerate();
 
@@ -52,7 +51,6 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
         error={error}
         onGenerate={generate}
         onRegenerate={handleRegenerate}
-        onAppendTag={appendTag}
       />
 
       <TemplateSection onUseTemplate={handleUseTemplate} />
