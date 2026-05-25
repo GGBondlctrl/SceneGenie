@@ -30,7 +30,7 @@ export function useGenerate() {
     lastRatioRef.current = selectedRatio;
 
     try {
-      const res = await api.generateVideo({ prompt, ratio: selectedRatio });
+      const res = await api.generateVideo({ html: prompt, ratio: selectedRatio });
 
       if (res.status === 'completed' && res.videoUrl && res.timeline) {
         setResult({
