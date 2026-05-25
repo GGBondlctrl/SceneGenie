@@ -42,7 +42,7 @@ module.exports = {
         'bg-panel': '#010B33',
         'cream': '#EFF4FF',
         'cream-muted': '#A7B3C7',
-        'neon': '#6FFF00',
+        'neon': '#00B4FF',
       },
       fontFamily: {
         'grotesk': ['Anton', 'sans-serif'],
