@@ -151,14 +151,14 @@ export default function GenerateSection({
       {/* Dark overlay for readability */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'rgba(1, 8, 40, 0.75)' }}
+        style={{ background: 'rgba(8, 8, 14, 0.78)' }}
       />
 
       {/* Dark vignette overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse at 50% 40%, transparent 0%, rgba(1,8,40,0.6) 100%)',
+          background: 'radial-gradient(ellipse at 50% 40%, transparent 0%, rgba(8,8,14,0.65) 100%)',
         }}
       />
 

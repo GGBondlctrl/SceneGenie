@@ -169,7 +169,7 @@ export default function TemplateSection({ onUseTemplate }: TemplateSectionProps)
 
   return (
     <section ref={sectionRef} className="relative w-full py-16 sm:py-20">
-      <div className="absolute inset-0 bg-gradient-to-b from-bg-dark via-[#020d2e] to-bg-dark" />
+      <div className="absolute inset-0 bg-gradient-to-b from-bg-dark via-[#08080f] to-bg-dark" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
         {/* Header */}
         <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5 mb-10">

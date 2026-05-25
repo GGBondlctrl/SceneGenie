@@ -34,16 +34,16 @@
 }
 
 @layer components {
-  /* Liquid Glass Effect — Blue Theme */
+  /* Liquid Glass Effect — Neutral transparent */
   .liquid-glass {
-    background: rgba(0, 20, 46, 0.6);
-    border: 1px solid rgba(0, 180, 255, 0.12);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 4px 24px rgba(0, 0, 0, 0.3);
+    background: rgba(18, 18, 26, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 4px 24px rgba(0, 0, 0, 0.25);
     position: relative;
     overflow: hidden;
   }
 
-  /* Edge highlight — blue tint */
+  /* Edge highlight — subtle white glow */
   .liquid-glass::before {
     content: '';
     position: absolute;
@@ -51,9 +51,9 @@
     border-radius: inherit;
     padding: 1px;
     background: linear-gradient(180deg,
-      rgba(0, 180, 255, 0.25) 0%, rgba(0, 180, 255, 0.08) 20%,
-      rgba(0, 180, 255, 0) 40%, rgba(0, 180, 255, 0) 60%,
-      rgba(0, 180, 255, 0.08) 80%, rgba(0, 180, 255, 0.25) 100%);
+      rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 20%,
+      rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0) 60%,
+      rgba(255, 255, 255, 0.03) 80%, rgba(255, 255, 255, 0.1) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
