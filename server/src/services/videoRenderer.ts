@@ -1,6 +1,6 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import { writeFile, unlink } from 'fs/promises';
+import { writeFile, rm, mkdir } from 'fs/promises';
 import path from 'path';
 
 const execFileAsync = promisify(execFile);
@@ -19,6 +19,7 @@ export interface RenderOptions {
   html: string;
   ratio: string;
   taskId: string;
+  duration: number;
 }
 
 export interface RenderResult {
@@ -26,15 +27,18 @@ export interface RenderResult {
   taskId: string;
 }
 
-export async function renderVideo({ html, ratio, taskId }: RenderOptions): Promise<RenderResult> {
+export async function renderVideo({ html, ratio, taskId, duration }: RenderOptions): Promise<RenderResult> {
   const dims = RATIO_DIMENSIONS[ratio];
   if (!dims) {
     throw new Error(`Unsupported ratio: ${ratio}`);
   }
 
-  const htmlPath = path.join(TEMP_DIR, `${taskId}.html`);
+  // HyperFrames expects a directory with index.html
+  const taskDir = path.join(TEMP_DIR, taskId);
+  const htmlPath = path.join(taskDir, 'index.html');
   const outputPath = path.join(OUTPUT_DIR, `${taskId}.mp4`);
 
+  await mkdir(taskDir, { recursive: true });
   await writeFile(htmlPath, html, 'utf-8');
 
   try {
@@ -43,7 +47,7 @@ export async function renderVideo({ html, ratio, taskId }: RenderOptions): Promi
       [
         'hyperframes',
         'render',
-        htmlPath,
+        taskDir,
         '-o',
         outputPath,
         '--width',
@@ -51,9 +55,9 @@ export async function renderVideo({ html, ratio, taskId }: RenderOptions): Promi
         '--height',
         String(dims.height),
         '--duration',
-        '5',
+        String(duration),
       ],
-      { timeout: 120000, cwd: process.cwd() }
+      { timeout: 120000, cwd: process.cwd(), shell: true }
     );
 
     return {
@@ -61,8 +65,9 @@ export async function renderVideo({ html, ratio, taskId }: RenderOptions): Promi
       taskId,
     };
   } finally {
+    // Clean up temp directory
     try {
-      await unlink(htmlPath);
+      await rm(taskDir, { recursive: true, force: true });
     } catch {
       // ignore cleanup errors
     }

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Code2, Frame, Sparkles, Download, RotateCcw } from 'lucide-react';
+import { Code2, Frame, Sparkles, Download, RotateCcw, Clock } from 'lucide-react';
 import gsap from 'gsap';
 import type { GenerateResult } from '../hooks/useGenerate';
 import { useLanguage } from '../hooks/useLanguage';
@@ -8,14 +8,12 @@ const ratios = ['16:9', '9:16', '1:1', '4:3'] as const;
 type Ratio = (typeof ratios)[number];
 
 const placeholderPrompts = [
-  '一个SaaS产品落地页：标题从左侧滑入，副标题淡入，CTA按钮弹性弹出，持续5秒...',
+  '一个SaaS产品落地页：标题从左侧滑入，副标题淡入，CTA按钮弹性弹出...',
   '数据可视化视频：柱状图从底部增长到目标值，数字滚动计数，最后整体淡出...',
   '产品介绍：Logo缩放出现，产品图从右侧滑入，特性列表逐个飞入，底部行动号召...',
   'TikTok字幕风格：文字逐字打出，emoji弹跳出现，背景色块滑动切换，快节奏剪辑...',
 ];
 
-const animTypes = ['fadeIn', 'slideX', 'scaleUp', 'stagger'];
-const animColors = ['#00B4FF', '#b724ff', '#3b82f6', '#f59e0b'];
 
 const BG_VIDEO = 'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260331_151551_992053d1-3d3e-4b8c-abac-45f22158f411.mp4';
 
@@ -28,6 +26,8 @@ interface GenerateSectionProps {
   phase: 'idle' | 'generating_html' | 'rendering_video' | 'completed' | 'error';
   result: GenerateResult | null;
   error: string | null;
+  duration: number;
+  setDuration: (v: number) => void;
   onGenerate: () => void;
   onRegenerate: () => void;
 }
@@ -41,6 +41,8 @@ export default function GenerateSection({
   phase,
   result,
   error,
+  duration,
+  setDuration,
   onGenerate,
   onRegenerate,
 }: GenerateSectionProps) {
@@ -58,8 +60,6 @@ export default function GenerateSection({
     subtitle: t({ en: 'Describe your needs, AI generates GSAP Timeline choreography, precise control over every frame', zh: '输入需求，AI 生成 GSAP Timeline 编排，精确控制每一帧' }),
     textareaHint: t({ en: 'Supports natural language animation descriptions', zh: '支持自然语言描述动画需求' }),
     ratioLabel: t({ en: 'Ratio', zh: '比例' }),
-    timelinePreview: t({ en: 'GSAP Timeline Preview', zh: 'GSAP Timeline Preview' }),
-    totalDuration: t({ en: '~5s total', zh: '~5s total' }),
     generating: t({ en: 'Orchestrating GSAP animation...', zh: '正在编排 GSAP 动画...' }),
     generatingHtml: t({ en: 'Generating animation code...', zh: '正在生成动画代码...' }),
     renderingVideo: t({ en: 'Rendering video...', zh: '正在渲染视频...' }),
@@ -67,7 +67,8 @@ export default function GenerateSection({
     downloadVideo: t({ en: 'Download Video', zh: '下载视频' }),
     regenerate: t({ en: 'Regenerate', zh: '重新生成' }),
     dimension: t({ en: 'Dimension', zh: '尺寸' }),
-    duration: t({ en: 'Duration', zh: '时长' }),
+    durationLabel: t({ en: 'Duration', zh: '时长' }),
+    durationHint: t({ en: 'sec', zh: '秒' }),
     generatedAt: t({ en: 'Generated at', zh: '生成时间' }),
     scrollHint: t({ en: 'Templates', zh: '编排模板' }),
     errorMsg: t({ en: 'Generation failed, please try again', zh: '生成失败，请重试' }),
@@ -207,8 +208,8 @@ export default function GenerateSection({
             </div>
           </div>
 
-          {/* Ratio selection */}
-          <div className="flex flex-wrap items-center gap-3 mb-5">
+          {/* Ratio & Duration selection */}
+          <div className="flex flex-wrap items-center gap-4 mb-5">
             <div className="flex items-center gap-2">
               <Frame size={13} className="text-cream/35" />
               <span className="font-mono text-cream/35 text-[11px] uppercase tracking-wider">{tx.ratioLabel}</span>
@@ -228,65 +229,52 @@ export default function GenerateSection({
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* GSAP Timeline Preview (shown during/after generation) */}
-          {(isGenerating || result) && (
-            <div className="mb-5 p-4 bg-black/30 rounded-[16px] border border-white/5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-mono text-[10px] text-neon uppercase tracking-wider">{tx.timelinePreview}</span>
-                <span className="font-mono text-[10px] text-cream/25">{tx.totalDuration}</span>
-              </div>
-              <div className="flex gap-1 h-6">
-                {([
-                  { label: '0.0s', width: '15%', color: '#00B4FF' },
-                  { label: '0.5s', width: '10%', color: '#b724ff' },
-                  { label: '1.2s', width: '20%', color: '#3b82f6' },
-                  { label: '2.0s', width: '15%', color: '#00B4FF' },
-                  { label: '3.0s', width: '25%', color: '#f59e0b' },
-                  { label: '4.5s', width: '15%', color: '#b724ff' },
-                ] as const).map((kf, i: number) => (
-                  <div key={i} className="relative group" style={{ width: kf.width }}>
-                    <div
-                      className="h-full rounded-[4px] transition-all duration-300 group-hover:brightness-125"
-                      style={{ backgroundColor: kf.color, opacity: 0.7 }}
-                    />
-                    <span className="absolute -bottom-4 left-0 font-mono text-[8px] text-cream/18">{kf.label}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-4 mt-5">
-                {animTypes.map((label, i) => (
-                  <div key={label} className="flex items-center gap-1.5">
-                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: animColors[i] }} />
-                    <span className="font-mono text-[9px] text-cream/25">{label}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="flex items-center gap-2">
+              <Clock size={13} className="text-cream/35" />
+              <span className="font-mono text-cream/35 text-[11px] uppercase tracking-wider">{tx.durationLabel}</span>
+              <input
+                type="number"
+                min={1}
+                max={300}
+                value={duration}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  if (!isNaN(v) && v >= 1 && v <= 300) {
+                    setDuration(v);
+                  }
+                }}
+                className="w-16 bg-black/30 rounded-[10px] px-2 py-1 text-cream font-mono text-[12px] text-center outline-none border border-white/5 focus:border-neon/30 transition-colors"
+              />
+              <span className="font-mono text-cream/25 text-[11px]">{tx.durationHint}</span>
             </div>
-          )}
+          </div>
 
           {/* Generate Button */}
           <button
             onClick={handleGenerate}
             disabled={isGenerating || !prompt.trim()}
-            className={`w-full py-4 rounded-[20px] font-grotesk text-[15px] uppercase tracking-[0.05em] flex items-center justify-center gap-3 transition-all duration-500 ${
+            className={`w-full py-4 rounded-[20px] font-grotesk text-[15px] uppercase tracking-[0.05em] transition-all duration-500 ${
               isGenerating || !prompt.trim()
                 ? 'bg-cream/10 text-cream/40 cursor-not-allowed'
                 : 'bg-neon text-bg-dark hover:shadow-[0_0_50px_rgba(0,180,255,0.35)] hover:scale-[1.01] active:scale-[0.99]'
             }`}
           >
-            {isGenerating ? (
-              <>
-                <div className="w-5 h-5 border-2 border-bg-dark/30 border-t-bg-dark rounded-full animate-spin" />
-                {phase === 'generating_html' ? tx.generatingHtml : tx.renderingVideo}
-              </>
-            ) : (
-              <>
-                <Sparkles size={17} />
-                {tx.generateBtn}
-              </>
-            )}
+            <span
+              key={isGenerating ? 'gen' : 'idle'}
+              className="flex items-center justify-center gap-3"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-bg-dark/30 border-t-bg-dark rounded-full animate-spin" />
+                  {phase === 'generating_html' ? tx.generatingHtml : tx.renderingVideo}
+                </>
+              ) : (
+                <>
+                  <Sparkles size={17} />
+                  {tx.generateBtn}
+                </>
+              )}
+            </span>
           </button>
 
           {/* Error */}
@@ -306,13 +294,17 @@ export default function GenerateSection({
             {/* Video Player */}
             <div className="relative aspect-video bg-black/40 rounded-[20px] overflow-hidden mb-5">
               <video
+                key={result.videoUrl}
                 src={result.videoUrl}
                 autoPlay
                 muted
                 loop
                 playsInline
-                preload="metadata"
+                controls
+                preload="auto"
                 className="w-full h-full object-contain"
+                onError={(e) => console.error('[Video] playback error:', e)}
+                onLoadedData={() => console.log('[Video] loaded successfully')}
               />
             </div>
 
@@ -338,7 +330,7 @@ export default function GenerateSection({
             {/* Info */}
             <div className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-[10px] text-cream/25 uppercase tracking-wider">
               <span>{tx.dimension}: {selectedRatio}</span>
-              <span>{tx.duration}: ~5s</span>
+              <span>{tx.durationLabel}: {duration}s</span>
               <span>{tx.generatedAt}: {formatDate(result.createdAt)}</span>
             </div>
           </div>

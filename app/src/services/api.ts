@@ -23,6 +23,7 @@ export class ApiError extends Error {
 export interface GenerateVideoRequest {
   html: string;
   ratio: '16:9' | '9:16' | '1:1' | '4:3';
+  duration: number;
 }
 
 export interface TimelineKeyframe {

@@ -110,7 +110,48 @@ d:/video_gen/
 - 侧边栏导航：Generate | Templates | History | Settings
 - 主区域：输入框 + 快捷模板 + 生成进度
 
-## 核心架构决策
+## 视频生成管线（核心流程）
+
+### 第一阶段：前端 → LLM 生成动画代码
+
+1. 用户在 Dashboard 输入提示词、选择比例（16:9 / 9:16 / 1:1 / 4:3）、设置时长（1~300 秒）
+2. `useGenerate` hook 调用 `generateHTML()`（llm.ts），将用户输入发给 LLM
+3. LLM 返回 JSON：`{ custom_css, html_elements, gsap_animations, duration }`
+4. `template.ts` 的 `renderTemplate()` 将三段代码注入预置 HTML 骨架，生成符合 HyperFrames 规范的完整 HTML
+   - 必须注入：`window.__timelines = { main: tl }`、`window.__hf = { duration, seek }`、`data-composition-id="main"`
+   - `tl` 必须设置 `paused: true`，避免自动播放
+   - 如果 GSAP 动画实际时长不足，自动补 `tl.to({}, { duration: gap })` 延长
+
+### 第二阶段：后端 → HyperFrames 渲染 MP4
+
+5. 前端 POST `/api/video/generate`（body: `{ html, ratio, duration }`）
+6. 后端 `videoRenderer.ts` 创建 `temp/{taskId}/index.html`，执行：
+   ```
+   npx hyperframes render {taskDir} -o {output}.mp4 --width 1920 --height 1080 --duration 60
+   ```
+7. 视频保存到 `public/videos/{taskId}.mp4`，返回 `{ videoUrl: "/videos/xxx.mp4" }`
+8. 前端 `<video>` 标签播放（Vite proxy 将 `/videos` 转发到 3001 端口）
+
+### 时长控制（三重保障）
+
+| 层级 | 机制 | 文件 |
+|------|------|------|
+| 用户显式控制 | 输入框设置秒数，作为 `forcedDuration` 传入 | GenerateSection.tsx → useGenerate.ts |
+| 自然语言兜底 | `parseDurationFromPrompt()` 解析提示词中的 "30秒" / "1分钟" | llm.ts |
+| 模板自动补全 | GSAP timeline 实际时长不足时自动延长 | template.ts |
+
+### 场景格式支持
+
+当用户提示词包含 `=== SCENE N ===` / `[timestamp]` 格式时，`buildUserPrompt()` 自动切换为"编译器模式"：
+- 每条 `[timestamp]` 条目映射为对应的 CSS + HTML + GSAP 动画
+- 时间戳通过 GSAP timeline position 参数精确定位
+- SYSTEM_PROMPT 包含场景格式转换规则（交叉淡入淡出、特效模拟等）
+
+### LLM JSON 容错
+
+`repairJSON()` + `tryParseJSON()` 提供两层修复：
+1. 提取最外层 `{...}` + 去除尾逗号 + 补全截断的括号
+2. `decodeHTMLEntities()` 清理泄漏到 GSAP 代码中的 HTML 实体（`&lt;` → `<` 等）
 
 1. **模板驱动 + 自由生成混合**：
    - MVP：LLM 在预定义模板内填充参数
@@ -148,4 +189,14 @@ d:/video_gen/
 4. **计划先行**：多步骤任务先制定计划，获确认后再编码。
 
 
-**最后会话更新**: 2026-05-25
+**最后会话更新**: 2026-05-26
+
+**项目底层视频生成核心**: GSAP — https://github.com/greensock/GSAP / HyperFrames — https://github.com/heygen-com/hyperframes
+
+## 已知注意事项
+
+1. **React 闭包陷阱**：`useGenerate` 的 `generate` 回调依赖数组必须包含 `duration`，否则用户修改时长后按钮拿的是过期旧值
+2. **Vite proxy**：`/videos` 和 `/api` 均需代理到 `http://localhost:3001`
+3. **Windows `execFile` + npx**：必须设置 `shell: true`，否则找不到 `.cmd` 脚本
+4. **HyperFrames 输入**：期望目录路径（含 `index.html`），不是文件路径
+5. **模板字符串中的反引号**：SYSTEM_PROMPT 内不能直接写未转义的反引号，会导致构建失败

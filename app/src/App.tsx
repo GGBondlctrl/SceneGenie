@@ -5,6 +5,7 @@ import HeroSection from './sections/HeroSection';
 import LoginModal from './components/LoginModal';
 import SettingsModal from './components/SettingsModal';
 import Dashboard from './pages/Dashboard';
+import ErrorBoundary from './components/ErrorBoundary';
 
 export default function App() {
   const { user, isLoggedIn, error, login, logout, register, clearError } = useAuth();
@@ -29,10 +30,12 @@ export default function App() {
   // Logged in → show Dashboard
   if (isLoggedIn && user) {
     return (
-      <Dashboard
-        user={user}
-        onLogout={logout}
-      />
+      <ErrorBoundary>
+        <Dashboard
+          user={user}
+          onLogout={logout}
+        />
+      </ErrorBoundary>
     );
   }
 

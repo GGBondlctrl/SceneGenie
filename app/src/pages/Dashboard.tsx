@@ -20,6 +20,8 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
     phase,
     result,
     error,
+    duration,
+    setDuration,
     generate,
     regenerate,
     clearResult,
@@ -27,8 +29,9 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
 
   const generateTopRef = useRef<HTMLDivElement>(null);
 
-  const handleUseTemplate = (templatePrompt: string) => {
+  const handleUseTemplate = (templatePrompt: string, templateDuration: number) => {
     setPrompt(templatePrompt);
+    setDuration(templateDuration);
     clearResult();
     generateTopRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -51,6 +54,8 @@ export default function Dashboard({ user, onLogout }: DashboardProps) {
         phase={phase}
         result={result}
         error={error}
+        duration={duration}
+        setDuration={setDuration}
         onGenerate={generate}
         onRegenerate={handleRegenerate}
       />

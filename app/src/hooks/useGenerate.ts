@@ -16,6 +16,7 @@ export function useGenerate() {
   const [phase, setPhase] = useState<GeneratePhase>('idle');
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [duration, setDuration] = useState(5);
 
   const lastPromptRef = useRef('');
   const lastRatioRef = useRef<'16:9' | '9:16' | '1:1' | '4:3'>('16:9');
@@ -46,8 +47,12 @@ export function useGenerate() {
     lastRatioRef.current = selectedRatio;
 
     let html: string;
+    let dur: number;
     try {
-      html = await generateHTML(llmConfig, prompt, selectedRatio);
+      const res = await generateHTML(llmConfig, prompt, selectedRatio, duration);
+      html = res.html;
+      dur = res.duration;
+      setDuration(dur);
     } catch (err) {
       setError('动画代码生成失败：' + (err as Error).message);
       setPhase('error');
@@ -57,7 +62,7 @@ export function useGenerate() {
     setPhase('rendering_video');
 
     try {
-      const res = await api.generateVideo({ html, ratio: selectedRatio });
+      const res = await api.generateVideo({ html, ratio: selectedRatio, duration: dur });
 
       if (res.status === 'completed' && res.videoUrl) {
         setResult({
@@ -74,7 +79,7 @@ export function useGenerate() {
       setError((err as Error).message || '视频渲染失败，请重试');
       setPhase('error');
     }
-  }, [prompt, selectedRatio, getLLMConfig]);
+  }, [prompt, selectedRatio, duration, getLLMConfig]);
 
   const regenerate = useCallback(() => {
     setPrompt(lastPromptRef.current);
@@ -99,6 +104,8 @@ export function useGenerate() {
     phase,
     result,
     error,
+    duration,
+    setDuration,
     generate,
     regenerate,
     clearResult,

@@ -115,7 +115,7 @@ const templates: TemplateItem[] = [
 ];
 
 interface TemplateSectionProps {
-  onUseTemplate: (prompt: string) => void;
+  onUseTemplate: (prompt: string, duration: number) => void;
 }
 
 export default function TemplateSection({ onUseTemplate }: TemplateSectionProps) {
@@ -233,7 +233,7 @@ export default function TemplateSection({ onUseTemplate }: TemplateSectionProps)
                   hoveredId === template.id ? 'opacity-100' : 'opacity-0'
                 }`}>
                   <button
-                    onClick={() => onUseTemplate(t(template.prompt))}
+                    onClick={() => onUseTemplate(t(template.prompt), parseInt(template.duration, 10))}
                     className="flex items-center gap-2 bg-neon text-bg-dark px-5 py-2.5 rounded-[999px] font-grotesk text-[12px] uppercase hover:shadow-[0_0_30px_rgba(0,180,255,0.4)] transition-shadow duration-300"
                   >
                     <Code2 size={14} />
@@ -276,7 +276,7 @@ export default function TemplateSection({ onUseTemplate }: TemplateSectionProps)
                     {template.elements} {tx.elements}
                   </span>
                   <button
-                    onClick={() => onUseTemplate(t(template.prompt))}
+                    onClick={() => onUseTemplate(t(template.prompt), parseInt(template.duration, 10))}
                     className="text-cream/25 hover:text-neon transition-colors duration-300"
                   >
                     <Play size={13} />

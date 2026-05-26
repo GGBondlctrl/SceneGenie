@@ -31,3 +31,7 @@ debug-screenshot.*
 
 # Claude local config
 .claude/
+
+# Generated videos
+server/public/videos/
+temp/

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, Globe, Key, Server } from 'lucide-react';
+import { X, Globe, Key, Server, Check, AlertCircle } from 'lucide-react';
 import type { Language } from '../hooks/useLanguage';
+import type { LLMProvider } from '../services/llm';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -13,20 +14,97 @@ export default function SettingsModal({ isOpen, onClose, lang, onLangChange }: S
   const [llmProvider, setLlmProvider] = useState('claude');
   const [llmKey, setLlmKey] = useState('');
   const [llmBaseUrl, setLlmBaseUrl] = useState('');
+  const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [testError, setTestError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setLlmProvider(localStorage.getItem('scene-genie-llm-provider') || 'claude');
       setLlmKey(localStorage.getItem('scene-genie-llm-key') || '');
       setLlmBaseUrl(localStorage.getItem('scene-genie-llm-baseurl') || '');
+      setTestStatus('idle');
+      setTestError('');
     }
   }, [isOpen]);
 
   const handleSave = () => {
+    const trimmedKey = llmKey.trim();
     localStorage.setItem('scene-genie-llm-provider', llmProvider);
-    localStorage.setItem('scene-genie-llm-key', llmKey);
-    localStorage.setItem('scene-genie-llm-baseurl', llmBaseUrl);
+    localStorage.setItem('scene-genie-llm-key', trimmedKey);
+    localStorage.setItem('scene-genie-llm-baseurl', llmBaseUrl.trim());
+    setLlmKey(trimmedKey);
     onClose();
+  };
+
+  const handleTest = async () => {
+    const trimmedKey = llmKey.trim();
+    if (!trimmedKey) {
+      setTestStatus('error');
+      setTestError(lang === 'zh' ? '请先输入 API Key' : 'Please enter an API Key first');
+      return;
+    }
+
+    setTestStatus('testing');
+    setTestError('');
+
+    try {
+      const provider = llmProvider as LLMProvider;
+      let url: string;
+      let headers: Record<string, string>;
+      let body: Record<string, unknown>;
+
+      if (provider === 'claude') {
+        url = 'https://api.anthropic.com/v1/messages';
+        headers = {
+          'Content-Type': 'application/json',
+          'x-api-key': trimmedKey,
+          'anthropic-version': '2023-06-01',
+        };
+        body = {
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 1,
+          messages: [{ role: 'user', content: 'Hi' }],
+        };
+      } else {
+        // OpenAI-compatible: OpenAI, Kimi, DeepSeek, Custom
+        url = provider === 'custom' && llmBaseUrl.trim()
+          ? llmBaseUrl.trim()
+          : provider === 'openai'
+            ? 'https://api.openai.com/v1/chat/completions'
+            : provider === 'kimi'
+              ? 'https://api.moonshot.cn/v1/chat/completions'
+              : provider === 'deepseek'
+                ? 'https://api.deepseek.com/v1/chat/completions'
+                : '';
+        headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${trimmedKey}`,
+        };
+        body = {
+          model: provider === 'openai' ? 'gpt-4o' : provider === 'kimi' ? 'moonshot-v1-8k' : provider === 'deepseek' ? 'deepseek-chat' : 'default',
+          messages: [{ role: 'user', content: 'Hi' }],
+          max_tokens: 1,
+        };
+      }
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        setTestStatus('success');
+      } else {
+        const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+        const msg = (data.error as Record<string, string>)?.message || `HTTP ${res.status}`;
+        setTestStatus('error');
+        setTestError(msg);
+      }
+    } catch (err) {
+      setTestStatus('error');
+      setTestError((err as Error).message);
+    }
   };
 
   if (!isOpen) return null;
@@ -147,6 +225,44 @@ export default function SettingsModal({ isOpen, onClose, lang, onLangChange }: S
                 />
               </div>
             )}
+
+            {/* Test Connection */}
+            {testStatus !== 'idle' && (
+              <div className={`mb-3 p-3 rounded-xl flex items-start gap-2 ${
+                testStatus === 'success'
+                  ? 'bg-green-500/10 border border-green-500/20'
+                  : testStatus === 'error'
+                    ? 'bg-red-500/10 border border-red-500/20'
+                    : 'bg-white/5 border border-white/10'
+              }`}>
+                {testStatus === 'success' && <Check size={14} className="text-green-400 mt-0.5 shrink-0" />}
+                {testStatus === 'error' && <AlertCircle size={14} className="text-red-400 mt-0.5 shrink-0" />}
+                {testStatus === 'testing' && (
+                  <div className="w-3.5 h-3.5 border-2 border-cream/30 border-t-cream/70 rounded-full animate-spin shrink-0 mt-0.5" />
+                )}
+                <span className={`font-mono text-[11px] leading-relaxed ${
+                  testStatus === 'success'
+                    ? 'text-green-400'
+                    : testStatus === 'error'
+                      ? 'text-red-400'
+                      : 'text-cream/50'
+                }`}>
+                  {testStatus === 'success'
+                    ? (lang === 'zh' ? '连接成功！API Key 有效' : 'Connection successful! API Key is valid')
+                    : testStatus === 'error'
+                      ? testError
+                      : (lang === 'zh' ? '正在测试连接...' : 'Testing connection...')}
+                </span>
+              </div>
+            )}
+
+            <button
+              onClick={handleTest}
+              disabled={testStatus === 'testing' || !llmKey.trim()}
+              className="w-full mb-4 py-2.5 rounded-xl text-[13px] font-mono uppercase tracking-wider border border-white/10 text-cream/70 hover:text-cream hover:border-white/20 hover:bg-white/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {lang === 'zh' ? '测试连接' : 'Test Connection'}
+            </button>
 
             {/* Privacy Note */}
             <p className="font-mono text-cream/40 text-[11px] leading-relaxed">
